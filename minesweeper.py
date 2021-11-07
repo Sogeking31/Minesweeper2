@@ -63,6 +63,7 @@ class Minesweeper:
 			self._update_screen()
 
 	def _show_number_ofmines(self):
+		""" shows how many mines remaining in the top left corner"""
 		self.width, self.height = 100, 35
 		self.box_color = (32, 32, 32)
 		self.digits_color = (255, 255, 255)
@@ -79,6 +80,7 @@ class Minesweeper:
 		self.msg_rect.center = self.box_rect.center
 
 	def _timer(self):
+		""" place a timer in the top right corner"""
 		self.width, self.height = 100, 35
 		self.timer_color = (32, 32, 32)
 		self.digits_color = (255, 255, 255)
@@ -89,8 +91,10 @@ class Minesweeper:
 
 		if self.game_active:
 			self.time = str((pygame.time.get_ticks()-self.start_time)//1000)
+			#start the timer when the game starts
 		else:
 			self.time =str(self.stop_time)
+			#freeze the timer when game won or gameover
 		self.digits = self.font.render(self.time, True, self.digits_color,
 		self.timer_color)
 		self.digits_rect = self.digits.get_rect()
@@ -98,6 +102,7 @@ class Minesweeper:
 
 
 	def _start_game(self): # start the game
+		""" creating function that starts the game when called"""
 		self.show_menu = False
 		self.settings.reset_groups(self)
 		self.screen = pygame.display.set_mode((self.settings.screen_width, 
@@ -260,6 +265,9 @@ class Minesweeper:
 			self.zeros.add(square) 
 
 	def _show_surrounding(self, number, number_clicked):
+		""" the function auto-click all squares that surrounds the number
+		that was clicked, only works if the the number of flags around
+		that number equals the number itself"""
 		self.sensor = Sensor(self) 
 		self.sensor.create_sensor(number_clicked) 
 		num_offlags = pygame.sprite.spritecollide(self.sensor, self.flags, False)
@@ -273,6 +281,8 @@ class Minesweeper:
 						self.squares.remove(surr_square)
 
 	def _check_mouse_left(self, mouse_pos):
+		"""this function check if the gane is active or not when
+		left-click then act accordingly"""
 		if self.game_active:
 			self._active_left(mouse_pos)
 		elif self.game_active == False:
@@ -280,6 +290,7 @@ class Minesweeper:
 
 	def _active_left(self, mouse_pos):
 		for flag in self.flags.sprites():
+			#when a flag is clicked
 			flag_clicked = flag.rect.collidepoint(mouse_pos)
 			if flag_clicked:
 				return()
@@ -293,7 +304,7 @@ class Minesweeper:
 				self.exploded_mines.add(exploded_mine)
 				self._game_over()
 				
-
+		# when a number is clicked
 		for one in self.ones.sprites():
 			one_clicked = one.rect.collidepoint(mouse_pos)
 			if one_clicked:
@@ -324,6 +335,7 @@ class Minesweeper:
 				self._show_surrounding(7, seven)
 				
 		for square in self.squares.sprites():
+		#when a square is clicked
 			square_clicked = square.rect.collidepoint(mouse_pos)
 			if square_clicked:
 				self.squares.remove(square) # remove the clicked square from square group
@@ -343,6 +355,8 @@ class Minesweeper:
 					self._create_numbers(square, num_surr)
 
 	def _game_won(self, time):
+		""" when game won show game won msg and make it inactive
+		and record the time"""
 		self.game_active = False
 		self.stop_time = self.time
 
@@ -355,6 +369,7 @@ class Minesweeper:
 
 	def _inactive_left(self, mouse_pos):
 		if self.show_menu == False:
+		# show the menu after losing/winning
 			if self.screen_rect.collidepoint(mouse_pos):
 				self.settings.reset_groups(self)
 				self.settings.apply_expert()
@@ -366,6 +381,7 @@ class Minesweeper:
 				return()
 
 		if self.show_menu:
+		#start the game with the chosen diffcaulty
 			if self.button.rect_main.collidepoint(mouse_pos):
 				self.settings.apply_normal()
 				self._start_game()
@@ -395,6 +411,7 @@ class Minesweeper:
 						self.squares.remove(empty_square)
 
 		for mine in self.mines.sprites():
+		# when mine are auto-clicked the game does not end, this line solve this problem
 			if not pygame.sprite.spritecollideany(mine, self.squares):
 				if not pygame.sprite.spritecollideany(mine, self.flags):
 					self._game_over()
@@ -405,6 +422,7 @@ class Minesweeper:
 				self.bg_squares.remove(bg_square)
 
 	def _game_over(self):
+		""" show all mines after losing, make game inactive"""
 		pygame.sprite.groupcollide(self.mines, self.squares, False, True)
 		for flag in self.flags.sprites():
 			if not pygame.sprite.spritecollideany(flag, self.mines):
